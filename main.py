@@ -715,17 +715,40 @@ if __name__ == "__main__":
         folder_to_save_reports_to=None,
         skip_previously_forecasted_questions=True,
         extra_metadata_in_explanation=True,
-        # llms={
-        #     "default": GeneralLlm(
-        #         model="openrouter/openai/gpt-4o",
-        #         temperature=0.3,
-        #         timeout=40,
-        #         allowed_tries=2,
-        #     ),
-        #     "summarizer": "openai/gpt-4o-mini",
-        #     "researcher": "asknews/news-summaries",
-        #     "parser": "openai/gpt-4o-mini",
-        # },
+        # Pinned 2026-11-17: the template's defaults are stale — forecasting-tools'
+        # default researcher (openrouter/openai/gpt-4o-search-preview) no longer
+        # exists on OpenRouter (404, "no provider serves this model anymore"),
+        # which failed Test Bot run #1 on all 10 questions. All roles pinned to
+        # a FREE reasoning model verified live on OpenRouter 2026-11-17 06:34 WIB
+        # (14 free models total; the old llama/deepseek free models are gone).
+        # Revisit when donated OpenRouter credits arrive (paid models forecast
+        # better) or if this model rotates off the free tier.
+        llms={
+            "default": GeneralLlm(
+                model="openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+                temperature=0.3,
+                timeout=120,
+                allowed_tries=2,
+            ),
+            "summarizer": GeneralLlm(
+                model="openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+                temperature=0,
+                timeout=120,
+                allowed_tries=2,
+            ),
+            "researcher": GeneralLlm(
+                model="openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+                temperature=0.3,
+                timeout=120,
+                allowed_tries=2,
+            ),
+            "parser": GeneralLlm(
+                model="openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+                temperature=0,
+                timeout=120,
+                allowed_tries=2,
+            ),
+        },
     )
 
     # Per-mode tournament URL shown in the summary banner footer. These
