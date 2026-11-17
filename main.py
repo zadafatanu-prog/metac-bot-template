@@ -709,7 +709,16 @@ if __name__ == "__main__":
     # uncomment and edit to pin specific models.
     template_bot = FallTemplateBot2026(
         research_reports_per_question=1,
-        predictions_per_research_report=5,
+        # 1 prediction per question (was 5): OpenRouter's free tier allows only
+        # 50 free-model requests/day on a $0-credit account. Each question costs
+        # 1 research + N forecast + N parser calls, so 5 predictions = 11
+        # calls/question and the 10-question test run hit the cap after 4
+        # questions (run #2, 2026-11-17). At 1 prediction = 3 calls/question,
+        # the test needs ~30 calls and the live tournament (~3-5 questions/day)
+        # needs ~9-15/day — both fit in 50. Trade-off: no median aggregation
+        # across predictions. Raise back to 5 when donated OpenRouter credits
+        # arrive (participation form) — they unlock 1,000 free requests/day.
+        predictions_per_research_report=1,
         use_research_summary_to_forecast=False,
         publish_reports_to_metaculus=publish_to_metaculus,
         folder_to_save_reports_to=None,
