@@ -739,8 +739,15 @@ if __name__ == "__main__":
                 timeout=120,
                 allowed_tries=2,
             ),
+            # Parser/summarizer use Gemma (not the reasoning model): run #3
+            # proved the Nemotron reasoning model cannot output bare JSON for
+            # structure_output — it returned <<REQUESTED TYPE WAS NOT FOUND IN
+            # TEXT>> on the DatePercentile parse (question 43324), failing 1/10
+            # questions. Gemma 4 31B is a strict instruction-follower for
+            # structured output. Default/researcher stay on the reasoning
+            # model (forecasting benefits from explicit reasoning).
             "summarizer": GeneralLlm(
-                model="openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+                model="openrouter/google/gemma-4-31b-it:free",
                 temperature=0,
                 timeout=120,
                 allowed_tries=2,
@@ -752,7 +759,7 @@ if __name__ == "__main__":
                 allowed_tries=2,
             ),
             "parser": GeneralLlm(
-                model="openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+                model="openrouter/google/gemma-4-31b-it:free",
                 temperature=0,
                 timeout=120,
                 allowed_tries=2,
@@ -800,7 +807,13 @@ if __name__ == "__main__":
         # The bot-testing-area tournament contains all question types and is
         # the recommended target for smoke-testing your bot.
         # https://www.metaculus.com/tournament/bot-testing-area/
-        template_bot.skip_previously_forecasted_questions = False
+        # Skip already-forecasted questions (template default is False): the
+        # OpenRouter free tier allows 50 requests/day, and run #3 already used
+        # ~31 of them forecasting 9/10 questions. Re-runs only do the
+        # questions that still lack a forecast, so the fix can be validated
+        # today (3 calls) instead of waiting for tomorrow's reset. Set back to
+        # False for a full from-scratch test when budget allows.
+        template_bot.skip_previously_forecasted_questions = True
         forecast_reports = asyncio.run(
             template_bot.forecast_on_tournament(
                 "bot-testing-area", return_exceptions=True
